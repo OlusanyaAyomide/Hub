@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from cloudinary.models import CloudinaryField
+from .helper import QuestionAnswer,generator,QuestionYear as Qs
 
 class UserManager(BaseUserManager):
 
@@ -45,5 +47,42 @@ class UserData(AbstractUser):
 class Instituition(models.Model):
     name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return  f'Institution {self.name}'
+
 class Subject(models.Model):
     name = models.CharField(max_length= 200)
+
+    def __str__(self):
+        return  f'Subject {self.name}'
+
+
+class Question(models.Model):
+    questionText = models.TextField()
+    optionA = models.CharField(max_length=500)
+    optionB = models.CharField(max_length=500)
+    optionC = models.CharField(max_length=500)
+    optionD = models.CharField(max_length=500)
+    answer = models.CharField(max_length=20,choices=QuestionAnswer)
+    Instituition = models.ManyToManyField(Instituition,related_name="question_inst")
+    subject = models.ForeignKey(Subject,related_name="question_subject",on_delete=models.CASCADE)
+    questionId = models.CharField(max_length = 10,editable=False,default = "")
+    correctionImage = CloudinaryField("image",blank = True,null = True)
+    correctionText = models.TextField(max_length=2000,blank=True,null=True)
+    created=models.DateTimeField(auto_now_add=True)
+    questionYear = models.CharField(max_length=200,choices=Qs)
+
+    def save(self,*args,**kwargs):
+        if self.questionId == "":
+            passed = False
+            value = ""
+            while not passed:
+                value = generator()
+                if not Question.objects.filter(questionId = value).exists():
+                    passed = True
+            self.questionId = value
+        super().save(*args,**kwargs)
+
+    def __str__(self):
+        return  f'question {self.questionId}'
+    
