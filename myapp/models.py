@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from cloudinary.models import CloudinaryField
 from .helper import QuestionAnswer,generator,QuestionYear as Qs
 
+
 class UserManager(BaseUserManager):
 
     use_in_migration = True
@@ -57,6 +58,15 @@ class Subject(models.Model):
         return  f'Subject {self.name}'
 
 
+
+
+class Topic(models.Model):
+    name = models.CharField(max_length=200)
+    subject = models.ForeignKey(Subject,on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
 class Question(models.Model):
     questionText = models.TextField()
     optionA = models.CharField(max_length=500)
@@ -64,6 +74,7 @@ class Question(models.Model):
     optionC = models.CharField(max_length=500)
     optionD = models.CharField(max_length=500)
     answer = models.CharField(max_length=20,choices=QuestionAnswer)
+    topic = models.ForeignKey(Topic,on_delete=models.SET_NULL,null = True)
     Instituition = models.ManyToManyField(Instituition,related_name="question_inst")
     subject = models.ForeignKey(Subject,related_name="question_subject",on_delete=models.CASCADE)
     questionId = models.CharField(max_length = 10,editable=False,default = "")
@@ -71,6 +82,7 @@ class Question(models.Model):
     correctionText = models.TextField(max_length=2000,blank=True,null=True)
     created=models.DateTimeField(auto_now_add=True)
     questionYear = models.CharField(max_length=200,choices=Qs)
+  
 
     def save(self,*args,**kwargs):
         if self.questionId == "":
@@ -85,4 +97,45 @@ class Question(models.Model):
 
     def __str__(self):
         return  f'question {self.questionId}'
-    
+
+class PublicQuestion(models.Model):
+    questionText = models.TextField()
+    created = models.DateField(auto_now_add=True)
+    createdBy = models.ForeignKey(UserData,on_delete=models.CASCADE,related_name="publicQuestion")
+    isActive = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.questionText
+
+
+class QuestionReply(models.Model):
+    question = models.ForeignKey(PublicQuestion,on_delete=models.CASCADE,related_name="questionReply")
+    replyBy = models.ForeignKey(UserData,on_delete=models.CASCADE,related_name="replies")
+    upvotes = models.ManyToManyField(UserData,related_name="upvotes")
+    downVotes = models.ManyToManyField(UserData,related_name="downvotes")
+    isActive = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'reply {self.replyBy.username}'
+
+
+class InstitutionChat(models.Model):
+    institution = models.OneToOneField(Instituition,related_name="instituteChat",on_delete=models.CASCADE)
+    roomDescription = models.CharField(max_length=2000) 
+    members = models.ManyToManyField(UserData,related_name="comMembers")
+    groupAdmins = models.ManyToManyField(UserData,related_name="admin",on_delete = models.CASCADE,blank=True)
+
+
+    def __str__(self):
+        return f'{self.institution} room chat' 
+
+class InstitutionMessage(models.Model):
+    messageText = models.TextField()
+    roomName = models.ForeignKey(InstitutionChat,on_delete=models.CASCADE,related_name="messages")
+    messageBy = models.ForeignKey(UserData,on_delete=models.CASCADE,related_name="roomMessages")
+    MessageTags = models.ForeignKey("self",null = True,on_delete=models.SET_NULL,blank = True)
+    created = models.DateTimeField(auto_now_add=True)
+    reactions = models.ManyToManyField(UserData,related_name="reactions",blank=True)
+
+    def __str__(self):
+        return self.messageText
