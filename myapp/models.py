@@ -39,7 +39,7 @@ class UserData(AbstractUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    
+    is_verified = models.BooleanField(default=False)
     objects = UserManager()
     
     USERNAME_FIELD = 'email'
@@ -123,7 +123,7 @@ class InstitutionChat(models.Model):
     institution = models.OneToOneField(Instituition,related_name="instituteChat",on_delete=models.CASCADE)
     roomDescription = models.CharField(max_length=2000) 
     members = models.ManyToManyField(UserData,related_name="comMembers")
-    groupAdmins = models.ManyToManyField(UserData,related_name="admin",on_delete = models.CASCADE,blank=True)
+    groupAdmins = models.ManyToManyField(UserData,related_name="admin",blank=True)
 
 
     def __str__(self):
@@ -139,3 +139,16 @@ class InstitutionMessage(models.Model):
 
     def __str__(self):
         return self.messageText
+
+
+class FileList(models.Model):
+    Instituition = models.ManyToManyField(Instituition,related_name="fileList")
+    description = models.CharField(max_length = 200,null = True,blank = True)
+    timeAdded = models.DateField(auto_now=True)
+    file = models.FileField(upload_to="store/pdf")
+    downloads = models.PositiveIntegerField(default=0)
+
+class Userverify(models.Model):
+    user = models.ForeignKey(UserData,on_delete=models.CASCADE)
+    verify = models.CharField(max_length=2000)
+    resetPassword = models.CharField(max_length=200)
