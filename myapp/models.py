@@ -103,6 +103,8 @@ class PublicQuestion(models.Model):
     created = models.DateField(auto_now_add=True)
     createdBy = models.ForeignKey(UserData,on_delete=models.CASCADE,related_name="publicQuestion")
     isActive = models.BooleanField(default=True)
+    title = models.CharField(max_length=2000)
+
 
     def __str__(self):
         return self.questionText
@@ -150,5 +152,4 @@ class FileList(models.Model):
 
 class Userverify(models.Model):
     user = models.ForeignKey(UserData,on_delete=models.CASCADE)
-    verify = models.CharField(max_length=2000)
     resetPassword = models.CharField(max_length=200)

@@ -1,0 +1,10 @@
+# class FogotPassWord(APIView):
+#     def get(self,request):
+#         email = request.query_params["email"]
+        
+
+# class PassWordReceiver(APIView):
+#     def get(self,request):
+#         send_mail("Hello for testing",'<h1 >www.google.com</h1>',"gracesegzy@gmail.com",["ayomideflex72@gmail.com"],False)
+#         return Response({"res":"mail siccesfully sent"})
+

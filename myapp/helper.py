@@ -13,6 +13,10 @@ def generator():
     res = ''.join(random.choices(string.ascii_uppercase +string.digits, k=N))
     return f'#{res}'
 
+def hashgenerator():
+    N =  50
+    res = ''.join(random.choices(string.ascii_uppercase +string.digits, k=N))
+    return res
 
 QuestionYear =[
     ("2011","2011"),
@@ -29,5 +33,4 @@ QuestionYear =[
     ("2022","2022"),
     ("2023","2023"),
 ]
-
 

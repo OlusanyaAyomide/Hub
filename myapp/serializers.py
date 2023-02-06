@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import UserData
+from .models import UserData,PublicQuestion
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserData
-        fields = ['email','password',"username"]
+        fields = ['email','password',"username","is_verified"]
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -28,3 +28,9 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+
+class PublicQuestionSerializer(serializers.ModelSerializer):
+    createdBy =serializers.StringRelatedField()
+    class Meta:
+        model = PublicQuestion
+        fields = "__all__"
