@@ -34,3 +34,9 @@ QuestionYear =[
     ("2023","2023"),
 ]
 
+def randumNumber():
+    myList = ""
+    for i in range(6):
+        randomstr = random.randint(1, 6)
+        myList += str(randomstr)
+    return int(myList)

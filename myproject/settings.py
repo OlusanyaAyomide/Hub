@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-vi!%steeh43eza)u48o$cx85q+evw_&c-k8o_6oi%b)43a*m#%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['eaa0-102-88-34-146.eu.ngrok.io','localhost' ]
 
 
 # Application definition
@@ -180,9 +180,3 @@ REST_FRAMEWORK = {
 MEDIA_ROOT = os.path.join(BASE_DIR,"media")
 MEDIA_URL = '/media/'
 
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_PORT = 587
-EMAIL_HOST_USER = "gracesegzy@gmail.com"
-EMAIL_HOST_PASSWORD = "yoclkegtjxayztlt"
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False

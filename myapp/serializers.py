@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserData,PublicQuestion
+from .models import UserData,PublicQuestion,QuestionReply
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,8 +29,18 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+
+class PublicQuestionReplySerializer(serializers.ModelSerializer):
+    # replyBy = serializers.StringRelatedField()
+    class Meta:
+        model =QuestionReply
+        # fields = ['replyBy,replyText',' created']
+        fields = "__all__"
+
+
 class PublicQuestionSerializer(serializers.ModelSerializer):
     createdBy =serializers.StringRelatedField()
+    questionReply = PublicQuestionReplySerializer(read_only = True, many = True)
     class Meta:
         model = PublicQuestion
         fields = "__all__"

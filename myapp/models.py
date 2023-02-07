@@ -104,6 +104,7 @@ class PublicQuestion(models.Model):
     createdBy = models.ForeignKey(UserData,on_delete=models.CASCADE,related_name="publicQuestion")
     isActive = models.BooleanField(default=True)
     title = models.CharField(max_length=2000)
+    image = CloudinaryField("image",blank = True,null = True)
 
 
     def __str__(self):
@@ -116,7 +117,8 @@ class QuestionReply(models.Model):
     upvotes = models.ManyToManyField(UserData,related_name="upvotes")
     downVotes = models.ManyToManyField(UserData,related_name="downvotes")
     isActive = models.BooleanField(default=False)
-
+    replyText = models.CharField(max_length = 2000)
+    created = models.DateField(auto_now_add=True)
     def __str__(self):
         return f'reply {self.replyBy.username}'
 
@@ -152,4 +154,4 @@ class FileList(models.Model):
 
 class Userverify(models.Model):
     user = models.ForeignKey(UserData,on_delete=models.CASCADE)
-    resetPassword = models.CharField(max_length=200)
+    resetPassword = models.IntegerField()
