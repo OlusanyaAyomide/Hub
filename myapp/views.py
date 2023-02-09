@@ -27,22 +27,12 @@ class PublicQuestionGV(generics.ListCreateAPIView):
         user = self.request.user
         serializer.save(createdBy = user,isActive = True)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"request": self.request})
+        return context
+        
 
-# class PublicQuestionReplyGV(generics.ListCreateAPIView):
-#     lookup_field = "Pk"
-#     serializer_class = PublicQuestionReplySerializer
-#     permission_classes = [PublicQuestionPermission]
-
-#     def get_queryset(self):
-#         questionId = self.kwargs["pk"]
-#         question = PublicQuestion.objects.get(pk = questionId)
-#         return QuestionReply.objects.filter(question = question)
-    
-#     def perform_create(self, serializer):
-#         user = self.request.user
-#         questionId = self.kwargs["pk"]
-#         question = PublicQuestion.objects.get(pk = questionId)
-#         serializer.save(question = question,replyBy = user)
     
 class PassWordResetLink(APIView):
     def post (self,request):
@@ -67,5 +57,19 @@ class PassWordResetLink(APIView):
 
         
 
-
-
+class PublicQuestionView(APIView):
+    permission_classes=[PublicQuestionPermission]
+    def get(self,request,pk):
+        question = PublicQuestion.objects.get(pk=pk)
+        serializer = PublicQuestionSerializer(question,context={"request":request,"pk":pk})
+        return Response(serializer.data)
+    
+    def post(self,request,pk):
+        print(request.user)
+        question = PublicQuestion.objects.get(pk=pk)
+        serializer = PublicQuestionReplySerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save(question = question,replyBy = request.user)
+            newserializer = PublicQuestionSerializer(question,context = {"request":request,"pk":pk})
+            return Response(newserializer.data)
+        return Response(serializer.errors)

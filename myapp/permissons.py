@@ -5,5 +5,7 @@ class PublicQuestionPermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         else:
+            if request.user.is_anonymous:
+                return False
             return True
           
