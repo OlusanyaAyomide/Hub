@@ -49,13 +49,13 @@ class Instituition(models.Model):
     name = models.CharField(max_length=200)
 
     def __str__(self):
-        return  f'Institution {self.name}'
+        return  f'{self.name}'
 
 class Subject(models.Model):
     name = models.CharField(max_length= 200)
 
     def __str__(self):
-        return  f'Subject {self.name}'
+        return  f'{self.name}'
 
 
 
@@ -108,8 +108,7 @@ class PublicQuestion(models.Model):
 
 
     def __str__(self):
-        return self.questionText
-
+        return f'{self.questionText} {self.id}' 
 
 class QuestionReply(models.Model):
     question = models.ForeignKey(PublicQuestion,on_delete=models.CASCADE,related_name="questionReply")
@@ -121,7 +120,7 @@ class QuestionReply(models.Model):
     created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'reply {self.replyText}'
+        return f'reply {self.replyText} {self.id}'
 
     class Meta:
         ordering = ("-created",)
@@ -159,3 +158,4 @@ class FileList(models.Model):
 class Userverify(models.Model):
     user = models.ForeignKey(UserData,on_delete=models.CASCADE)
     resetPassword = models.IntegerField()
+

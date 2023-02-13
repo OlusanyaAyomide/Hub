@@ -1,10 +1,11 @@
 from rest_framework import serializers
-from .models import UserData,PublicQuestion,QuestionReply
+from .models import UserData,PublicQuestion,QuestionReply,Instituition,Question,Topic,Subject
+from django.shortcuts import get_object_or_404
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserData
-        fields = ['email','password',"username","is_verified"]
+        fields = ["id",'email','password',"username","is_verified"]
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -34,10 +35,11 @@ class PublicQuestionReplySerializer(serializers.ModelSerializer):
     replyBy = serializers.StringRelatedField()
     inUpvote = serializers.SerializerMethodField()
     inDownVote = serializers.SerializerMethodField()
+    voteCount = serializers.SerializerMethodField()
 
     class Meta:
         model =QuestionReply
-        fields = ['replyBy','replyText','created','inUpvote','inDownVote']
+        fields = ["id",'replyBy','replyText','created','inUpvote','inDownVote',"voteCount"]
 
     def get_inUpvote(self,value):
         user = self.context["request"].user
@@ -52,6 +54,10 @@ class PublicQuestionReplySerializer(serializers.ModelSerializer):
             return True
         return False
     
+    def get_voteCount(self,value):
+        upvote = value.upvotes.all().count()
+        downvote = value.downVotes.all().count()
+        return upvote - downvote
 
 
 class PublicQuestionSerializer(serializers.ModelSerializer):
@@ -65,14 +71,33 @@ class PublicQuestionSerializer(serializers.ModelSerializer):
         }
 
     def get_questionReply(self,obj):
-        print("passed 1")
-        question = PublicQuestion.objects.get(pk = obj.id)
+        question = get_object_or_404(PublicQuestion,pk = obj.id)
         replies = QuestionReply.objects.filter(question = question)
-        print(self.context)
         serializer = PublicQuestionReplySerializer(replies,many = True,context = {
             "request":self.context["request"]
         })
         return serializer.data
-        # else:
-        #     replies = QuestionReply.objects.all()
- 
+
+class InstitutionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Instituition
+        fields = "__all__"
+
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = "__all__"
+
+class TopicSerializer(serializers.ModelSerializer):
+    subject = serializers.StringRelatedField()
+    class Meta:
+        model = Topic
+        fields = "__all__"
+
+class QuestionSerializer(serializers.ModelSerializer):
+    Instituition = InstitutionSerializer(read_only = True,many = True)
+    class Meta:
+        model = Question
+        exclude = ["subject"]
+        read_only_fields = ['topic', 'questionId','subject',"Instituition"]
+        

@@ -2,10 +2,10 @@ import string
 import random
 
 QuestionAnswer = [
-    ("optionA","A"),
-    ("optionB","B"),
-    ("optionC","C"),
-    ("optionD","D")
+    ("A","A"),
+    ("B","B"),
+    ("C","C"),
+    ("D","D")
 ]
 
 def generator():
