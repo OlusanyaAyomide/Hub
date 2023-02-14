@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserData,PublicQuestion,QuestionReply,Instituition,Question,Topic,Subject
+from .models import UserData,PublicQuestion,QuestionReply,Instituition,Question,Topic,Subject,InstitutionMessage
 from django.shortcuts import get_object_or_404
 
 class UserSerializer(serializers.ModelSerializer):
@@ -39,7 +39,7 @@ class PublicQuestionReplySerializer(serializers.ModelSerializer):
 
     class Meta:
         model =QuestionReply
-        fields = ["id",'replyBy','replyText','created','inUpvote','inDownVote',"voteCount"]
+        fields = ["id",'replyBy','replyText','created','inUpvote','inDownVote',"voteCount","slug"]
 
     def get_inUpvote(self,value):
         user = self.context["request"].user
@@ -100,4 +100,14 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         exclude = ["subject"]
         read_only_fields = ['topic', 'questionId','subject',"Instituition"]
+
+
+# class InstitutionMessageSerializer(serializers.ModelSerializer):
+#     roomName = serializers.StringRelatedField()
+#     messageBy = UserData(read_only = True)
+#     class Meta:
+#         model = InstitutionMessage
+#         fields = "__all__"
+        
+  
         

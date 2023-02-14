@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from cloudinary.models import CloudinaryField
-from .helper import QuestionAnswer,generator,QuestionYear as Qs
+from .helper import QuestionAnswer,generator,QuestionYear as Qs,slugGenerator,MessageslugGenerator,customgenerator
+from django.utils.text import slugify
 
 
 class UserManager(BaseUserManager):
@@ -47,9 +48,22 @@ class UserData(AbstractUser):
 
 class Instituition(models.Model):
     name = models.CharField(max_length=200)
+    slug = models.SlugField(default="",blank=True)
 
     def __str__(self):
         return  f'{self.name}'
+
+    def save(self,*args,**kwargs):
+        if self.slug == "":
+            passed = False
+            value = ""
+            while not passed:
+                value = slugify(f"institution {self.name} {slugGenerator()}")
+                if not Instituition.objects.filter(slug = value).exists():
+                    passed = True
+            self.slug = value
+        super().save(*args,**kwargs)
+
 
 class Subject(models.Model):
     name = models.CharField(max_length= 200)
@@ -64,8 +78,12 @@ class Topic(models.Model):
     name = models.CharField(max_length=200)
     subject = models.ForeignKey(Subject,on_delete=models.CASCADE)
 
+
     def __str__(self):
         return self.name
+    
+
+
 
 class Question(models.Model):
     questionText = models.TextField()
@@ -105,7 +123,18 @@ class PublicQuestion(models.Model):
     isActive = models.BooleanField(default=True)
     title = models.CharField(max_length=2000)
     image = CloudinaryField("image",blank = True,null = True)
-
+    slug = models.SlugField(default="",blank=True)
+    
+    def save(self,*args,**kwargs):
+        if self.slug == "":
+            passed = False
+            value = ""
+            while not passed:
+                value = slugify(f"{self.title} public question {slugGenerator()}")
+                if not PublicQuestion.objects.filter(slug = value).exists():
+                    passed = True
+            self.slug = value
+        super().save(*args,**kwargs)
 
     def __str__(self):
         return f'{self.questionText} {self.id}' 
@@ -118,6 +147,7 @@ class QuestionReply(models.Model):
     isActive = models.BooleanField(default=False)
     replyText = models.CharField(max_length = 2000)
     created = models.DateTimeField(auto_now_add=True)
+    slug = models.SlugField(default="",blank=True)
 
     def __str__(self):
         return f'reply {self.replyText} {self.id}'
@@ -125,27 +155,65 @@ class QuestionReply(models.Model):
     class Meta:
         ordering = ("-created",)
 
+    
+    def save(self,*args,**kwargs):
+        if self.slug == "":
+            passed = False
+            value = ""
+            while not passed:
+                value = slugify(f"{self.question.title} reply {slugGenerator()}")
+                if not QuestionReply.objects.filter(slug = value).exists():
+                    passed = True
+            self.slug = value
+        super().save(*args,**kwargs)
+
 
 class InstitutionChat(models.Model):
     institution = models.OneToOneField(Instituition,related_name="instituteChat",on_delete=models.CASCADE)
-    roomDescription = models.CharField(max_length=2000) 
+    roomDescription = models.CharField(max_length=2000,null=True) 
     members = models.ManyToManyField(UserData,related_name="comMembers")
     groupAdmins = models.ManyToManyField(UserData,related_name="admin",blank=True)
-
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(default="",blank=True)
 
     def __str__(self):
         return f'{self.institution} room chat' 
 
+    def save(self,*args,**kwargs):
+        if self.slug == "":
+            passed = False
+            value = ""
+            while not passed:
+                value = slugify(f"{self.name} chat room {slugGenerator()}")
+                if not InstitutionChat.objects.filter(slug = value).exists():
+                    passed = True
+            self.slug = value
+        super().save(*args,**kwargs)
+
+
 class InstitutionMessage(models.Model):
-    messageText = models.TextField()
+    messageText = models.TextField(null = True)
     roomName = models.ForeignKey(InstitutionChat,on_delete=models.CASCADE,related_name="messages")
     messageBy = models.ForeignKey(UserData,on_delete=models.CASCADE,related_name="roomMessages")
     MessageTags = models.ForeignKey("self",null = True,on_delete=models.SET_NULL,blank = True)
     created = models.DateTimeField(auto_now_add=True)
     reactions = models.ManyToManyField(UserData,related_name="reactions",blank=True)
+    slug = models.SlugField(default="",blank=True)
 
     def __str__(self):
         return self.messageText
+
+    
+    def save(self,*args,**kwargs):
+        if self.slug == "":
+            passed = False
+            value = ""
+            while not passed:
+                value = slugify(f"{self.roomName.name} message {MessageslugGenerator()}")
+                if not InstitutionMessage.objects.filter(slug = value).exists():
+                    passed = True
+            self.slug = value
+        super().save(*args,**kwargs)
 
 
 class FileList(models.Model):

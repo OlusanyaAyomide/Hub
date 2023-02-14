@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
 from .serializers import UserSerializer,PublicQuestionSerializer,PublicQuestionReplySerializer,InstitutionSerializer,SubjectSerializer,TopicSerializer,QuestionSerializer
-from .models import UserData,PublicQuestion,QuestionReply,Userverify,Instituition,Subject,Topic
+from .models import UserData,PublicQuestion,QuestionReply,Userverify,Instituition,Subject,Topic,InstitutionChat
 from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .permissons import PublicQuestionPermission,AdminOrGetpermission
@@ -55,55 +55,71 @@ class PassWordResetLink(APIView):
 
         
 
+#Get request to view all Puiblic Question post requst to add a new public Question
+
 class PublicQuestionView(APIView):
     permission_classes=[PublicQuestionPermission]
-    def get(self,request,pk):
-        question = get_object_or_404(PublicQuestion,pk = pk)
-        serializer = PublicQuestionSerializer(question,context={"request":request,"pk":pk})
+    def get(self,request,slug):
+        question = get_object_or_404(PublicQuestion,slug = slug)
+        serializer = PublicQuestionSerializer(question,context={"request":request,"slug":slug})
         return Response(serializer.data)
     
-    def post(self,request,pk):
-        question = get_object_or_404(PublicQuestion,pk = pk)
+    def post(self,request,slug):
+        question = get_object_or_404(PublicQuestion,slug = slug)
         serializer = PublicQuestionReplySerializer(data = request.data)
         if serializer.is_valid():
             serializer.save(question = question,replyBy = request.user)
-            newserializer = PublicQuestionSerializer(question,context = {"request":request,"pk":pk})
+            newserializer = PublicQuestionSerializer(question,context = {"request":request,"slug":slug})
             return Response(newserializer.data)
         return Response(serializer.errors)
 
+
+#Upvote public question reply 
 class UpvoteQuestionAV(APIView):
     permission_classes =[IsAuthenticated]
-    def post(self,request,pk):
-        reply = get_object_or_404(QuestionReply,pk=pk)
+    def post(self,request,slug):
+        reply = get_object_or_404(QuestionReply,slug = slug)
         if request.user in reply.downVotes.all():
             reply.downVotes.remove(request.user)
         reply.upvotes.add(request.user)
         question = reply.question
-        serializer = PublicQuestionSerializer(question,context={"request":request,"pk":pk})
+        serializer = PublicQuestionSerializer(question,context={"request":request,"slug":slug})
         return Response(serializer.data)
 
+
+#Downvote public question reply 
 class DownVoteQuestionAV(APIView):
     permission_classes = [IsAuthenticated]
-    def post(self,request,pk):
-        reply = get_object_or_404(QuestionReply,pk=pk)
+    def post(self,request,slug):
+        reply = get_object_or_404(QuestionReply,slug = slug)
         if request.user in reply.upvotes.all():
             reply.upvotes.remove(request.user)
         reply.downVotes.add(request.user)
         question = reply.question
-        serializer = PublicQuestionSerializer(question,context={"request":request,"pk":pk})
+        serializer = PublicQuestionSerializer(question,context={"request":request,"slug":slug})
         return Response(serializer.data)
 
+
+#View to add a new institution and creating an institution chatroom simultaneously
 
 class InstitutionAddGV(generics.ListCreateAPIView):
     permission_classes = [IsAdminUser]
     serializer_class =  InstitutionSerializer
     queryset = Instituition.objects.all()
 
+    def perform_create(self, serializer):
+        name = self.request.data["name"]
+        object  = serializer.save()
+        InstitutionChat.objects.create(name = f'{name} Community',institution = object)
+
+
 class SubjectCreateGV(generics.ListCreateAPIView):
     permission_classes = [AdminOrGetpermission]
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
 
+
+#Get all Topic for a subject
 class TopicViewGV(generics.ListCreateAPIView):
     permission_classes = [AdminOrGetpermission]
     serializer_class = TopicSerializer

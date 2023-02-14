@@ -18,6 +18,21 @@ def hashgenerator():
     res = ''.join(random.choices(string.ascii_uppercase +string.digits, k=N))
     return res
 
+def slugGenerator():
+    N =  15
+    res = ''.join(random.choices(string.ascii_uppercase +string.digits, k=N))
+    return res
+
+
+def MessageslugGenerator():
+    N =  40
+    res = ''.join(random.choices(string.ascii_uppercase +string.digits, k=N))
+    return res
+
+def customgenerator(num):
+    res = ''.join(random.choices(string.ascii_uppercase +string.digits, k=num))
+    return res
+
 QuestionYear =[
     ("2011","2011"),
     ("2012","2012"),
